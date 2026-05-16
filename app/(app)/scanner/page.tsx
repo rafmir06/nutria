@@ -50,29 +50,42 @@ export default function ScannerPage() {
     const scanner = new Html5Qrcode("qr-reader");
     html5QrCodeRef.current = scanner;
 
+    const onScan = async (decodedText: string) => {
+      await stopScanner();
+      setMode("result");
+      setLoading(true);
+      const product = await fetchProductByBarcode(decodedText);
+      setLoading(false);
+      if (product) {
+        setSelected(product);
+      } else {
+        toast.error("Produit non trouvé dans Open Food Facts");
+        setMode("idle");
+      }
+    };
+
     try {
       await scanner.start(
         { facingMode: "environment" },
         { fps: 10, qrbox: { width: 250, height: 150 } },
-        async (decodedText: string) => {
-          await stopScanner();
-          setMode("result");
-          setLoading(true);
-          const product = await fetchProductByBarcode(decodedText);
-          setLoading(false);
-          if (product) {
-            setSelected(product);
-          } else {
-            toast.error("Produit non trouvé dans Open Food Facts");
-            setMode("idle");
-          }
-        },
+        onScan,
         () => {}
       );
       setScannerReady(true);
     } catch {
-      toast.error("Impossible d'accéder à la caméra");
-      setMode("idle");
+      // Fallback: try any available camera
+      try {
+        await scanner.start(
+          { facingMode: "user" },
+          { fps: 10, qrbox: { width: 250, height: 150 } },
+          onScan,
+          () => {}
+        );
+        setScannerReady(true);
+      } catch {
+        toast.error("Impossible d'accéder à la caméra. Vérifiez les permissions.");
+        setMode("idle");
+      }
     }
   }, [stopScanner]);
 
@@ -213,107 +226,115 @@ export default function ScannerPage() {
             className="fixed inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-sm"
             onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}
           >
-            <div className="glass-dark rounded-t-3xl p-6 max-h-[85vh] overflow-y-auto">
-              {/* Handle */}
-              <div className="w-10 h-1 rounded-full bg-white/20 mx-auto mb-6" />
-
-              {/* Product info */}
-              <div className="flex gap-4 mb-6">
-                {selected.image_url ? (
-                  <Image src={selected.image_url} alt={selected.name} width={72} height={72}
-                    className="h-18 w-18 rounded-2xl object-cover bg-white/5" />
-                ) : (
-                  <div className="h-18 w-18 rounded-2xl bg-white/5 flex items-center justify-center text-3xl">🍽️</div>
-                )}
-                <div className="flex-1">
-                  <p className="font-bold text-white text-lg leading-tight">{selected.name}</p>
-                  {selected.brand && <p className="text-sm text-white/40 mt-0.5">{selected.brand}</p>}
-                  <p className="text-xs text-white/30 mt-1">Pour {qty}g</p>
-                </div>
-              </div>
-
-              {/* Nutrition grid */}
-              {nutrition && (
-                <div className="grid grid-cols-4 gap-2 mb-6">
-                  {[
-                    { label: "Calories", value: Math.round(nutrition.calories), unit: "kcal", color: "text-nutriorange" },
-                    { label: "Protéines", value: Math.round(nutrition.protein_g), unit: "g", color: "text-nutriblue" },
-                    { label: "Glucides", value: Math.round(nutrition.carbs_g), unit: "g", color: "text-nutripurple" },
-                    { label: "Lipides", value: Math.round(nutrition.fat_g), unit: "g", color: "text-nutrigreen" },
-                  ].map(n => (
-                    <div key={n.label} className="macro-badge">
-                      <span className={cn("text-lg font-bold", n.color)}>{n.value}</span>
-                      <span className="text-[10px] text-white/30">{n.unit}</span>
-                      <span className="text-[10px] text-white/50">{n.label}</span>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              {/* Quantity */}
-              <div className="mb-4">
-                <p className="text-sm text-white/60 mb-2">Quantité</p>
-                <div className="flex items-center gap-3">
-                  <button
-                    onClick={() => setQuantity(q => String(Math.max(10, (parseFloat(q) || 100) - 10)))}
-                    className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center press-effect"
-                  >
-                    <Minus className="h-4 w-4 text-white" />
-                  </button>
-                  <input
-                    type="number"
-                    value={quantity}
-                    onChange={e => setQuantity(e.target.value)}
-                    className="flex-1 input-glass text-center text-lg font-bold"
-                    min="1"
-                  />
-                  <span className="text-white/40 text-sm w-6">g</span>
-                  <button
-                    onClick={() => setQuantity(q => String((parseFloat(q) || 100) + 10))}
-                    className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center press-effect"
-                  >
-                    <Plus className="h-4 w-4 text-white" />
-                  </button>
-                </div>
-              </div>
-
-              {/* Meal type */}
-              <div className="mb-6">
-                <p className="text-sm text-white/60 mb-2">Repas</p>
-                <div className="grid grid-cols-4 gap-2">
-                  {MEAL_TYPES.map(mt => (
-                    <button
-                      key={mt}
-                      onClick={() => setMealType(mt)}
-                      className={cn(
-                        "rounded-2xl py-2.5 text-xs font-medium press-effect transition-all",
-                        mealType === mt
-                          ? "bg-nutrigreen text-black"
-                          : "bg-white/5 text-white/50"
-                      )}
-                    >
-                      {getMealLabel(mt).split("-")[0]}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Add button */}
-              <motion.button
-                whileTap={{ scale: 0.97 }}
-                onClick={handleAdd}
-                disabled={loading}
-                className="btn-primary"
+            <div className="glass-dark rounded-t-3xl flex flex-col h-[92dvh]">
+              {/* Handle — tap to close */}
+              <div
+                className="flex-none flex justify-center pt-3 pb-2 cursor-pointer"
+                onClick={() => setSelected(null)}
               >
-                {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin mx-auto" />
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <Check className="h-5 w-5" />
-                    Ajouter au journal
-                  </span>
+                <div className="w-10 h-1 rounded-full bg-white/20" />
+              </div>
+
+              {/* Scrollable content */}
+              <div className="flex-1 overflow-y-auto px-6 pt-2 pb-4">
+                {/* Product info */}
+                <div className="flex gap-4 mb-6">
+                  {selected.image_url ? (
+                    <Image src={selected.image_url} alt={selected.name} width={72} height={72}
+                      className="h-18 w-18 rounded-2xl object-cover bg-white/5" />
+                  ) : (
+                    <div className="h-18 w-18 rounded-2xl bg-white/5 flex items-center justify-center text-3xl">🍽️</div>
+                  )}
+                  <div className="flex-1">
+                    <p className="font-bold text-white text-lg leading-tight">{selected.name}</p>
+                    {selected.brand && <p className="text-sm text-white/40 mt-0.5">{selected.brand}</p>}
+                    <p className="text-xs text-white/30 mt-1">Pour {qty}g</p>
+                  </div>
+                </div>
+
+                {/* Nutrition grid */}
+                {nutrition && (
+                  <div className="grid grid-cols-4 gap-2 mb-6">
+                    {[
+                      { label: "Calories", value: Math.round(nutrition.calories), unit: "kcal", color: "text-nutriorange" },
+                      { label: "Protéines", value: Math.round(nutrition.protein_g), unit: "g", color: "text-nutriblue" },
+                      { label: "Glucides", value: Math.round(nutrition.carbs_g), unit: "g", color: "text-nutripurple" },
+                      { label: "Lipides", value: Math.round(nutrition.fat_g), unit: "g", color: "text-nutrigreen" },
+                    ].map(n => (
+                      <div key={n.label} className="macro-badge">
+                        <span className={cn("text-lg font-bold", n.color)}>{n.value}</span>
+                        <span className="text-[10px] text-white/30">{n.unit}</span>
+                        <span className="text-[10px] text-white/50">{n.label}</span>
+                      </div>
+                    ))}
+                  </div>
                 )}
-              </motion.button>
+
+                {/* Quantity */}
+                <div className="mb-4">
+                  <p className="text-sm text-white/60 mb-2">Quantité</p>
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setQuantity(q => String(Math.max(10, (parseFloat(q) || 100) - 10)))}
+                      className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center press-effect"
+                    >
+                      <Minus className="h-4 w-4 text-white" />
+                    </button>
+                    <input
+                      type="number"
+                      value={quantity}
+                      onChange={e => setQuantity(e.target.value)}
+                      className="flex-1 input-glass text-center text-lg font-bold"
+                      min="1"
+                    />
+                    <span className="text-white/40 text-sm w-6">g</span>
+                    <button
+                      onClick={() => setQuantity(q => String((parseFloat(q) || 100) + 10))}
+                      className="h-11 w-11 rounded-2xl bg-white/10 flex items-center justify-center press-effect"
+                    >
+                      <Plus className="h-4 w-4 text-white" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Meal type */}
+                <div className="mb-2">
+                  <p className="text-sm text-white/60 mb-2">Repas</p>
+                  <div className="grid grid-cols-4 gap-2">
+                    {MEAL_TYPES.map(mt => (
+                      <button
+                        key={mt}
+                        onClick={() => setMealType(mt)}
+                        className={cn(
+                          "rounded-2xl py-2.5 text-xs font-medium press-effect transition-all",
+                          mealType === mt ? "bg-nutrigreen text-black" : "bg-white/5 text-white/50"
+                        )}
+                      >
+                        {getMealLabel(mt).split("-")[0]}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Fixed add button */}
+              <div className="flex-none px-6 pb-8 pt-3 border-t border-white/[0.06]">
+                <motion.button
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleAdd}
+                  disabled={loading}
+                  className="btn-primary"
+                >
+                  {loading ? (
+                    <Loader2 className="h-5 w-5 animate-spin mx-auto" />
+                  ) : (
+                    <span className="flex items-center justify-center gap-2">
+                      <Check className="h-5 w-5" />
+                      Ajouter au journal
+                    </span>
+                  )}
+                </motion.button>
+              </div>
             </div>
           </motion.div>
         )}

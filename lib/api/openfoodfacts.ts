@@ -41,7 +41,7 @@ export async function fetchProductByBarcode(barcode: string): Promise<FoodProduc
 export async function searchProducts(query: string): Promise<FoodProduct[]> {
   try {
     const res = await fetch(
-      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&search_simple=1&action=process&json=1&page_size=20&fields=code,product_name,brands,image_front_url,nutriments,serving_size`,
+      `https://world.openfoodfacts.org/cgi/search.pl?search_terms=${encodeURIComponent(query)}&action=process&json=1&page_size=20&fields=code,product_name,brands,image_front_url,nutriments,serving_size&sort_by=unique_scans_n`,
       { next: { revalidate: 300 } }
     );
 
