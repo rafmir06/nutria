@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { useEffect } from "react";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { useProfile } from "@/hooks/useProfile";
 import { useDailyLog } from "@/hooks/useDailyLog";
@@ -21,9 +22,24 @@ const MEAL_ORDER: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
 
 export default function DashboardPage() {
   const { user, loading: authLoading } = useAuthContext();
-  const { profile, loading: pLoading } = useProfile(user?.id);
-  const { entries, consumed, removeEntry, loading: logLoading } = useDailyLog(user?.id);
-  const { latestWeight, weightDiff } = useWeightLog(user?.id);
+  const { profile, loading: pLoading, refetch: refetchProfile } = useProfile(user?.id);
+  const { entries, consumed, removeEntry, loading: logLoading, refetch: refetchLog } = useDailyLog(user?.id);
+  const { latestWeight, weightDiff, refetch: refetchWeight } = useWeightLog(user?.id);
+
+  useEffect(() => {
+    const onFocus = () => {
+      refetchProfile();
+      refetchLog();
+      refetchWeight();
+    };
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") onFocus();
+    });
+    return () => {
+      window.removeEventListener("focus", onFocus);
+    };
+  }, [refetchProfile, refetchLog, refetchWeight]);
 
   if (authLoading || pLoading || logLoading) return <DashboardSkeleton />;
   if (!profile) return null;
