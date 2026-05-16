@@ -1,9 +1,6 @@
-﻿"use client";
+"use client";
 
-import { useAuthContext } from "@/providers/AuthProvider";
-import { useProfile } from "@/hooks/useProfile";
-import { useDailyLog } from "@/hooks/useDailyLog";
-import { useWeightLog } from "@/hooks/useWeightLog";
+import { useAppData } from "@/providers/AppDataContext";
 import { DashboardSkeleton } from "@/components/ui/SkeletonCard";
 import { MacroRing } from "@/components/ui/MacroRing";
 import { MacroBar } from "@/components/ui/MacroBar";
@@ -12,20 +9,17 @@ import { MealEntryCard } from "@/components/ui/FoodCard";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
-import { clampPercent, formatWeight, getMealLabel, getMealEmoji } from "@/lib/utils";
-import { Flame, TrendingUp, Plus, ChevronRight, Droplets } from "lucide-react";
+import { formatWeight, getMealLabel, getMealEmoji } from "@/lib/utils";
+import { Flame, TrendingUp, Plus, ChevronRight } from "lucide-react";
 import Link from "next/link";
 import type { MealType } from "@/types";
 
 const MEAL_ORDER: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
 
 export default function DashboardPage() {
-  const { user, loading: authLoading } = useAuthContext();
-  const { profile, loading: pLoading } = useProfile(user?.id);
-  const { entries, consumed, removeEntry, loading: logLoading } = useDailyLog(user?.id);
-  const { latestWeight, weightDiff } = useWeightLog(user?.id);
+  const { profile, entries, consumed, removeEntry, latestWeight, weightDiff, loading } = useAppData();
 
-  if (authLoading || pLoading || logLoading) return <DashboardSkeleton />;
+  if (loading) return <DashboardSkeleton />;
   if (!profile) return null;
 
   const remaining = {
@@ -115,7 +109,6 @@ export default function DashboardPage() {
 
       {/* Stats row */}
       <div className="grid grid-cols-2 gap-3 mb-4">
-        {/* Weight */}
         <GlassCard delay={0.3} className="!p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="h-8 w-8 rounded-xl bg-nutriblue/20 flex items-center justify-center">
@@ -133,7 +126,6 @@ export default function DashboardPage() {
           )}
         </GlassCard>
 
-        {/* Calories brûlées estimées */}
         <GlassCard delay={0.35} className="!p-4">
           <div className="flex items-center gap-2 mb-2">
             <div className="h-8 w-8 rounded-xl bg-nutriorange/20 flex items-center justify-center">

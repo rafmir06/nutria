@@ -7,7 +7,7 @@ import { fr } from "date-fns/locale";
 import { ChevronLeft, ChevronRight, Plus, Flame } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { useDailyLog } from "@/hooks/useDailyLog";
-import { useProfile } from "@/hooks/useProfile";
+import { useAppData } from "@/providers/AppDataContext";
 import { MealEntryCard } from "@/components/ui/FoodCard";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
@@ -20,7 +20,7 @@ const MEAL_ORDER: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
 
 export default function JournalPage() {
   const { user } = useAuthContext();
-  const { profile } = useProfile(user?.id);
+  const { profile } = useAppData();
   const [date, setDate] = useState(new Date());
   const dateStr = format(date, "yyyy-MM-dd");
   const isToday = format(new Date(), "yyyy-MM-dd") === dateStr;

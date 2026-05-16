@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Users, Plus, Copy, X, Loader2, Check, LogOut } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
-import { useProfile } from "@/hooks/useProfile";
+import { useAppData } from "@/providers/AppDataContext";
 import { createClient } from "@/lib/supabase/client";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NutriInput } from "@/components/ui/NutriInput";
@@ -14,7 +14,7 @@ import type { FamilyGroup, FamilyMember } from "@/types";
 
 export default function FamilyPage() {
   const { user } = useAuthContext();
-  const { profile, updateProfile } = useProfile(user?.id);
+  const { profile, updateProfile } = useAppData();
   const supabase = createClient();
 
   const [group, setGroup] = useState<FamilyGroup | null>(null);

@@ -30,8 +30,9 @@ app/
 components/
   layout/         BottomNav, AppLayout
   ui/             GlassCard, MacroRing, MacroBar, NutriInput, FoodCard, SkeletonCard
-hooks/            useProfile, useDailyLog, useWeightLog, useFavorites
+hooks/            useProfile, useDailyLog, useWeightLog, useFavorites (directs — utilisés uniquement en dehors du layout app)
 providers/        AuthProvider (createClient au module level, getUser pas getSession)
+                  AppDataContext (profil + entries aujourd'hui + weight logs — partagé dans tout le layout app)
 lib/supabase/     client.ts, server.ts
 public/icons/     icon-192.png, icon-512.png, apple-touch-icon.png (générés par scripts/generate-icons.mjs)
 scripts/          generate-icons.mjs (utilise sharp)
@@ -46,7 +47,8 @@ scripts/          generate-icons.mjs (utilise sharp)
 - Onboarding utilise `.upsert({ onConflict: "user_id" })` pour créer le profil même si le trigger n'a pas fonctionné
 - `experimental.optimizeCss` retiré de next.config.ts (nécessite `critters` non installé → crash Vercel)
 - `staleTimes: { dynamic: 0 }` dans next.config.ts pour désactiver le cache router côté client
-- Dashboard : navigation via `window.location.href` (hard reload) pour forcer le rechargement des données — hack temporaire en attendant un refactor vers un contexte global de données
+- **AppDataContext** : chargement global dans `AppLayout` — profile, entries du jour, weight logs. Refetch des entries à chaque changement de route (via `useEffect` sur `pathname` dans `AppLayoutInner`). Plus de hack `window.location.href`.
+- Journal garde son propre `useDailyLog` (navigation entre dates) mais prend `profile` du contexte.
 
 ## Scanner (page /scanner)
 - Bottom sheet : `overflow-y-auto` + `max-h-[92dvh]` + `pb-32` pour dégager la bottom nav et la safe area iPhone
@@ -66,7 +68,6 @@ npm run dev
 ```
 
 ## Ce qui reste à faire
-- **Refactor prioritaire** : déplacer les hooks de données dans un contexte global (AppDataContext) pour éviter le hack `window.location.href` sur le dashboard et avoir des transitions fluides
 - Réactiver et corriger les RLS policies (désactivées pour débug — risque sécurité en prod)
 - Connexion Google OAuth (Supabase + Google Cloud Console)
 - Tester le scanner barcode sur mobile (vérifier permissions caméra)

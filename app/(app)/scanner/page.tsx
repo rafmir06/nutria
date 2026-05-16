@@ -7,7 +7,7 @@ import Image from "next/image";
 import { fetchProductByBarcode, searchProducts } from "@/lib/api/openfoodfacts";
 import { createClient } from "@/lib/supabase/client";
 import { useAuthContext } from "@/providers/AuthProvider";
-import { useProfile } from "@/hooks/useProfile";
+import { useAppData } from "@/providers/AppDataContext";
 import { calculateNutrition, getMealLabel, todayISO } from "@/lib/utils";
 import { FoodProductCard } from "@/components/ui/FoodCard";
 import { NutriInput } from "@/components/ui/NutriInput";
@@ -19,7 +19,7 @@ const MEAL_TYPES: MealType[] = ["breakfast", "lunch", "dinner", "snack"];
 
 export default function ScannerPage() {
   const { user } = useAuthContext();
-  const { profile } = useProfile(user?.id);
+  const { profile } = useAppData();
   const supabase = createClient();
 
   const [mode, setMode] = useState<"idle" | "scanning" | "search" | "result">("idle");

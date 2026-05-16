@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useAuthContext } from "@/providers/AuthProvider";
-import { useProfile } from "@/hooks/useProfile";
+import { useAppData } from "@/providers/AppDataContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NutriInput } from "@/components/ui/NutriInput";
 import { calculateTDEE, calculateMacroTargets, getGoalCalories } from "@/lib/utils";
@@ -14,8 +14,8 @@ import type { GoalType, ActivityLevel, Gender } from "@/types";
 import { cn } from "@/lib/utils";
 
 export default function ProfilePage() {
-  const { user, signOut, loading: authLoading } = useAuthContext();
-  const { profile, updateProfile, loading: pLoading } = useProfile(user?.id);
+  const { user, signOut } = useAuthContext();
+  const { profile, updateProfile, loading: pLoading } = useAppData();
 
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -90,7 +90,7 @@ export default function ProfilePage() {
     setEditing(false);
   };
 
-  if (authLoading || pLoading) return (
+  if (pLoading) return (
     <div className="flex items-center justify-center min-h-dvh">
       <div className="h-8 w-8 animate-spin rounded-full border-2 border-white/10 border-t-nutrigreen" />
     </div>

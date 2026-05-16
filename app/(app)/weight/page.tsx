@@ -9,9 +9,7 @@ import {
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Plus, TrendingDown, TrendingUp, Minus, Trash2, X } from "lucide-react";
-import { useAuthContext } from "@/providers/AuthProvider";
-import { useWeightLog } from "@/hooks/useWeightLog";
-import { useProfile } from "@/hooks/useProfile";
+import { useAppData } from "@/providers/AppDataContext";
 import { GlassCard } from "@/components/ui/GlassCard";
 import { NutriInput } from "@/components/ui/NutriInput";
 import { SkeletonCard } from "@/components/ui/SkeletonCard";
@@ -19,9 +17,7 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 
 export default function WeightPage() {
-  const { user } = useAuthContext();
-  const { profile } = useProfile(user?.id);
-  const { weightLogs, loading, latestWeight, weightDiff, addLog, removeLog } = useWeightLog(user?.id);
+  const { profile, weightLogs, loading, latestWeight, weightDiff, addLog, removeLog } = useAppData();
 
   const [showModal, setShowModal] = useState(false);
   const [newWeight, setNewWeight] = useState("");
