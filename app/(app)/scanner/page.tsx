@@ -219,15 +219,25 @@ export default function ScannerPage() {
       <AnimatePresence>
         {selected && (
           <motion.div
-            initial={{ opacity: 0, y: "100%" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "100%" }}
-            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             className="fixed inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-sm"
             onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}
           >
-            <div className="glass-dark rounded-t-3xl overflow-y-auto" style={{ maxHeight: "92dvh" }}>
-              {/* Handle — tap to close */}
+            <motion.div
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.4 }}
+              onDragEnd={(_, info) => { if (info.offset.y > 100) setSelected(null); }}
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="glass-dark rounded-t-3xl overflow-y-auto"
+              style={{ maxHeight: "92dvh" }}
+            >
+              {/* Handle — tap or swipe down to close */}
               <div
                 className="flex justify-center pt-3 pb-2 cursor-pointer sticky top-0 z-10"
                 style={{ background: "inherit" }}
@@ -334,7 +344,7 @@ export default function ScannerPage() {
                 </motion.button>
               </div>
               </div>
-            </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
