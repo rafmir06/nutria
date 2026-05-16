@@ -231,13 +231,22 @@ export default function WeightPage() {
             onClick={e => { if (e.target === e.currentTarget) setShowModal(false); }}
           >
             <motion.div
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={{ top: 0, bottom: 0.4 }}
+              onDragEnd={(_, info) => { if (info.offset.y > 100) setShowModal(false); }}
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
               transition={{ type: "spring", stiffness: 400, damping: 35 }}
-              className="glass-dark w-full rounded-t-3xl p-6"
+              className="glass-dark w-full rounded-t-3xl overflow-y-auto"
+              style={{ maxHeight: "92dvh" }}
             >
-              <div className="flex items-center justify-between mb-6">
+              <div className="flex justify-center pt-3 pb-1 cursor-grab">
+                <div className="h-1 w-10 rounded-full bg-white/20" />
+              </div>
+              <div className="px-6 pb-10">
+              <div className="flex items-center justify-between mb-6 mt-2">
                 <h3 className="text-lg font-bold text-white">Nouvelle pesée</h3>
                 <button onClick={() => setShowModal(false)} className="h-8 w-8 rounded-xl bg-white/10 flex items-center justify-center">
                   <X className="h-4 w-4 text-white" />
@@ -277,6 +286,7 @@ export default function WeightPage() {
                   <span className="h-5 w-5 animate-spin rounded-full border-2 border-black/30 border-t-black mx-auto block" />
                 ) : "Enregistrer"}
               </motion.button>
+              </div>
             </motion.div>
           </motion.div>
         )}

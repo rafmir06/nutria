@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import { useState, useEffect } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, type PanInfo } from "framer-motion";
 import { Users, Plus, Copy, X, Loader2, Check, LogOut } from "lucide-react";
 import { useAuthContext } from "@/providers/AuthProvider";
 import { useAppData } from "@/providers/AppDataContext";
@@ -145,11 +145,20 @@ export default function FamilyPage() {
                 onClick={e => { if (e.target === e.currentTarget) setShowCreate(false); }}
               >
                 <motion.div
+                  drag="y"
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={{ top: 0, bottom: 0.4 }}
+                  onDragEnd={(_: unknown, info: PanInfo) => { if (info.offset.y > 100) setShowCreate(false); }}
                   initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                   transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                  className="glass-dark w-full rounded-t-3xl p-6"
+                  className="glass-dark w-full rounded-t-3xl overflow-y-auto"
+                  style={{ maxHeight: "92dvh" }}
                 >
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex justify-center pt-3 pb-1 cursor-grab">
+                    <div className="h-1 w-10 rounded-full bg-white/20" />
+                  </div>
+                  <div className="px-6 pb-10">
+                  <div className="flex items-center justify-between mb-6 mt-2">
                     <h3 className="text-lg font-bold text-white">Créer un groupe</h3>
                     <button onClick={() => setShowCreate(false)} className="h-8 w-8 rounded-xl bg-white/10 flex items-center justify-center">
                       <X className="h-4 w-4 text-white" />
@@ -159,6 +168,7 @@ export default function FamilyPage() {
                   <button onClick={createGroup} disabled={!groupName || submitting} className="btn-primary mt-4 disabled:opacity-40">
                     {submitting ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Créer"}
                   </button>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
@@ -173,11 +183,20 @@ export default function FamilyPage() {
                 onClick={e => { if (e.target === e.currentTarget) setShowJoin(false); }}
               >
                 <motion.div
+                  drag="y"
+                  dragConstraints={{ top: 0, bottom: 0 }}
+                  dragElastic={{ top: 0, bottom: 0.4 }}
+                  onDragEnd={(_: unknown, info: PanInfo) => { if (info.offset.y > 100) setShowJoin(false); }}
                   initial={{ y: "100%" }} animate={{ y: 0 }} exit={{ y: "100%" }}
                   transition={{ type: "spring", stiffness: 400, damping: 35 }}
-                  className="glass-dark w-full rounded-t-3xl p-6"
+                  className="glass-dark w-full rounded-t-3xl overflow-y-auto"
+                  style={{ maxHeight: "92dvh" }}
                 >
-                  <div className="flex items-center justify-between mb-6">
+                  <div className="flex justify-center pt-3 pb-1 cursor-grab">
+                    <div className="h-1 w-10 rounded-full bg-white/20" />
+                  </div>
+                  <div className="px-6 pb-10">
+                  <div className="flex items-center justify-between mb-6 mt-2">
                     <h3 className="text-lg font-bold text-white">Rejoindre un groupe</h3>
                     <button onClick={() => setShowJoin(false)} className="h-8 w-8 rounded-xl bg-white/10 flex items-center justify-center">
                       <X className="h-4 w-4 text-white" />
@@ -187,6 +206,7 @@ export default function FamilyPage() {
                   <button onClick={joinGroup} disabled={!inviteCode || submitting} className="btn-primary mt-4 disabled:opacity-40">
                     {submitting ? <Loader2 className="h-5 w-5 animate-spin mx-auto" /> : "Rejoindre"}
                   </button>
+                  </div>
                 </motion.div>
               </motion.div>
             )}
