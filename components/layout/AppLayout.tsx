@@ -25,7 +25,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           transition={{ duration: 0.2, ease: "easeOut" }}
           className="flex-1 pb-24"
         >
-          {children}
+          <div key={pathname}>
+            {children}
+          </div>
         </motion.main>
       </AnimatePresence>
       <BottomNav />
