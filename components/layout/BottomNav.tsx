@@ -25,7 +25,12 @@ export function BottomNav() {
           const isScanner = href === "/scanner";
 
           return (
-            <Link key={href} href={href} className="relative flex flex-col items-center">
+            <Link
+              key={href}
+              href={href}
+              className="relative flex flex-col items-center"
+              onClick={href === "/dashboard" ? (e) => { e.preventDefault(); window.location.href = href; } : undefined}
+            >
               <motion.div
                 whileTap={{ scale: 0.85 }}
                 className={cn(
