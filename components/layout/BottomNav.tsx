@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion } from "framer-motion";
 import { LayoutDashboard, ScanLine, BookOpen, TrendingUp, User } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -16,6 +16,7 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  const router = useRouter();
 
   return (
     <nav className="glass-nav fixed bottom-0 left-0 right-0 z-50 safe-bottom">
@@ -25,7 +26,12 @@ export function BottomNav() {
           const isScanner = href === "/scanner";
 
           return (
-            <Link key={href} href={href} className="relative flex flex-col items-center">
+            <Link
+              key={href}
+              href={href}
+              className="relative flex flex-col items-center"
+              onClick={() => router.refresh()}
+            >
               <motion.div
                 whileTap={{ scale: 0.85 }}
                 className={cn(
