@@ -316,7 +316,7 @@ export default function ScannerPage() {
                   </div>
                 </div>
               {/* Add button */}
-              <div className="pt-3 pb-8">
+              <div className="pt-3 pb-24">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleAdd}
