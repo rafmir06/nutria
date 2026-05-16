@@ -226,17 +226,17 @@ export default function ScannerPage() {
             className="fixed inset-0 z-40 flex flex-col justify-end bg-black/60 backdrop-blur-sm"
             onClick={e => { if (e.target === e.currentTarget) setSelected(null); }}
           >
-            <div className="glass-dark rounded-t-3xl flex flex-col h-[92dvh]">
+            <div className="glass-dark rounded-t-3xl overflow-y-auto" style={{ maxHeight: "92dvh" }}>
               {/* Handle — tap to close */}
               <div
-                className="flex-none flex justify-center pt-3 pb-2 cursor-pointer"
+                className="flex justify-center pt-3 pb-2 cursor-pointer sticky top-0 z-10"
+                style={{ background: "inherit" }}
                 onClick={() => setSelected(null)}
               >
                 <div className="w-10 h-1 rounded-full bg-white/20" />
               </div>
 
-              {/* Scrollable content */}
-              <div className="flex-1 overflow-y-auto px-6 pt-2 pb-4">
+              <div className="px-6 pt-2">
                 {/* Product info */}
                 <div className="flex gap-4 mb-6">
                   {selected.image_url ? (
@@ -315,10 +315,8 @@ export default function ScannerPage() {
                     ))}
                   </div>
                 </div>
-              </div>
-
-              {/* Fixed add button */}
-              <div className="flex-none px-6 pb-8 pt-3 border-t border-white/[0.06]">
+              {/* Add button */}
+              <div className="pt-3 pb-8">
                 <motion.button
                   whileTap={{ scale: 0.97 }}
                   onClick={handleAdd}
@@ -334,6 +332,7 @@ export default function ScannerPage() {
                     </span>
                   )}
                 </motion.button>
+              </div>
               </div>
             </div>
           </motion.div>
